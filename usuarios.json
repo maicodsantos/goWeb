@@ -1,0 +1,10 @@
+{
+    "id": 1,
+    "nome": "Maicon",
+    "sobrenome": "Santos",
+    "email": "maicon@gmail.com",
+    "idade": 33,
+    "altura": 179,
+    "ativo": true,
+    "dataDeCriacao": "12/07/1989"
+}
