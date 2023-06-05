@@ -1,10 +1,17 @@
 package json
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
+
+type Users struct {
+	Usuarios []User `json:"usuarios"`
+}
 
 type User struct {
 	Id            int    `json:"id"`
@@ -18,27 +25,26 @@ type User struct {
 }
 
 func GetAll(c *gin.Context) {
-	mockedUsers := []User{{Id: 1, Nome: "Maicon", Sobrenome: "Santos", Email: "maicon@hotmails.com", Idade: 33, Altura: 179, Ativo: true, DataDeCriacao: "12/07/1989"}, {Id: 2, Nome: "Isa", Sobrenome: "Souza", Email: "isa@hotmail.com", Idade: 27, Altura: 160, Ativo: true, DataDeCriacao: "16/03/1994"}}
-	var filtered []User
-	for _, value := range mockedUsers {
-		if value.Nome == c.Query("nome") {
-			filtered = append(filtered, value)
+	jsonFile, err := ioutil.ReadFile("./json/usuarios.json")
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
+	}
+
+	var usuarios Users
+	json.Unmarshal(jsonFile, &usuarios)
+
+	var usuariosFiltrados []User
+	var param = c.Query("nome")
+	fmt.Println(param)
+	if param != "" {
+		for _, usuario := range usuarios.Usuarios {
+			if usuario.Nome == param {
+				usuariosFiltrados = append(usuariosFiltrados, usuario)
+			}
+
 		}
 	}
 
-	c.JSON(200, gin.H{"users": filtered})
-}
+	c.JSON(200, gin.H{"usuarios": usuariosFiltrados})
 
-func GetById(c *gin.Context) {
-	mockedUsers := []User{{Id: 1, Nome: "Maicon", Sobrenome: "Santos", Email: "maicon@hotmail.com", Idade: 33, Altura: 179, Ativo: true, DataDeCriacao: "12/07/1989"}, {Id: 2, Nome: "Isa", Sobrenome: "Souza", Email: "isa@hotmail.com", Idade: 27, Altura: 160, Ativo: true, DataDeCriacao: "16/03/1994"}}
-
-	var user User
-
-	for _, value := range mockedUsers {
-		if fmt.Sprint(value.Id) == c.Param("id") {
-			user = value
-		}
-	}
-
-	c.JSON(200, gin.H{"User": user})
 }
