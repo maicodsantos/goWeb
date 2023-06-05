@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -46,5 +48,33 @@ func GetAll(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{"usuarios": usuariosFiltrados})
+
+}
+
+func GetById(c *gin.Context) {
+	jsonFile, err := ioutil.ReadFile("./json/usuarios.json")
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
+	}
+
+	var usuarios Users
+	json.Unmarshal(jsonFile, &usuarios)
+
+	var usuariosFiltrados []User
+	param, err := strconv.Atoi(c.Param("id"))
+	if err == nil {
+		for _, usuario := range usuarios.Usuarios {
+			if usuario.Id == param {
+				usuariosFiltrados = append(usuariosFiltrados, usuario)
+			}
+
+		}
+	}
+
+	if usuariosFiltrados == nil {
+		c.JSON(http.StatusNotFound, "Não há informações disponíveis")
+	} else {
+		c.JSON(200, gin.H{"usuarios": usuariosFiltrados})
+	}
 
 }

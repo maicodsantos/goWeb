@@ -12,8 +12,7 @@ func main() {
 		c.JSON(200, gin.H{"message": "Ola, Maicon"})
 	})
 	router.GET("users", json.GetAll)
-
-	//router.GET("users/:id", json.GetById)
+	router.GET("users/:id", json.GetById)
 
 	router.Run()
 }
