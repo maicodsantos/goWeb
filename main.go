@@ -13,6 +13,7 @@ func main() {
 	})
 	router.GET("users", json.GetAll)
 	router.GET("users/:id", json.GetById)
+	router.POST("users", json.Create())
 
 	router.Run()
 }

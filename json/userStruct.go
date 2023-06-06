@@ -26,6 +26,33 @@ type User struct {
 	DataDeCriacao string `json:"data_de_criacao"`
 }
 
+var users []User
+var lastID int
+
+func Create() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req User
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		token := c.GetHeader("token")
+		if token != "123456" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "você não tem permissão para fazer a solicitação solicitada",
+			})
+			return
+		}
+		lastID++
+		req.Id = lastID
+		users = append(users, req)
+		fmt.Println(users)
+		c.JSON(http.StatusCreated, req)
+	}
+}
+
 func GetAll(c *gin.Context) {
 	jsonFile, err := ioutil.ReadFile("./json/usuarios.json")
 	if err != nil {
