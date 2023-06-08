@@ -15,5 +15,6 @@ func main() {
 	pr := r.Group("/users")
 	pr.POST("/post", u.Create())
 	pr.GET("/get", u.GetAll())
+	pr.PUT("/:id", u.Update())
 	r.Run()
 }
