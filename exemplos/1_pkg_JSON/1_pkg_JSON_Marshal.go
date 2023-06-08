@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-type produto struct {
+type Produto struct {
 	Nome      string
 	Preco     float64
 	Publicado bool

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -134,5 +135,62 @@ func (c *User) Update() gin.HandlerFunc {
 		}
 		ctx.JSON(http.StatusOK, u) // Retorno "OK" do Service
 
+	}
+}
+
+func (c *User) UpdateName() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		token := ctx.GetHeader("token")
+		if token != "123456" {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "token inválido"})
+			return
+		}
+
+		id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+			return
+		}
+
+		var req request
+		if err := ctx.ShouldBindJSON(&req); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if req.Nome == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "o nome do usuário é obrigatório"})
+			return
+		}
+
+		u, err := c.service.UpdateNome(int(id), req.Nome)
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, u)
+	}
+}
+
+func (c *User) Delete() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		token := ctx.GetHeader("token")
+		if token != "123456" {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "token inválido"})
+			return
+		}
+
+		id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+			return
+		}
+
+		err = c.service.Delete(int(id))
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{"data": fmt.Sprintf("O produto %d foi removido", id)})
 	}
 }

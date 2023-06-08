@@ -10,6 +10,8 @@ type Repository interface {
 	Create(id int, nome, sobrenome, email string, idade, altura int, ativo bool, dataDeCriacao string) (User, error)
 	LastID() (int, error)
 	Update(id int, nome, sobrenome, email string, idade, altura int, ativo bool, dataDeCriacao string) (User, error)
+	UpdateNome(id int, nome string) (User, error)
+	Delete(id int) error
 }
 
 type repository struct{}
@@ -34,17 +36,49 @@ func (r *repository) Create(id int, nome, sobrenome, email string, idade, altura
 }
 
 func (repository) Update(id int, nome, sobrenome, email string, idade, altura int, ativo bool, dataDeCriacao string) (User, error) {
-	u := User{Nome: nome, Sobrenome: sobrenome, Email: email, Idade: idade, Altura: altura, Ativo: ativo, DataDeCriacao: dataDeCriacao} // Instância de "p" para Update
-	updated := false                                                                                                                    // Atribuição false para Updated - não foi realizado nenhum update até aqui
-	for i := range users {                                                                                                              // Este For percorrerá a lista dos elementos criados no array para buscar o elemento com o Id que já existe
-		if users[i].Nome == nome { // Caso encontre esse Id ...
-			u.Id = id      // ... o Id do novo produto será o mesmo do já existente (basicamente, o Id que passamos substituirá o já existente, só que são iguais)...
-			users[i] = u   // ... e aqui, irá atualizar (neste Id), todos os valores dos elementos que enviarmos no Put...
-			updated = true // ... alterando o seu status para "True"
+	u := User{Nome: nome, Sobrenome: sobrenome, Email: email, Idade: idade, Altura: altura, Ativo: ativo, DataDeCriacao: dataDeCriacao}
+	updated := false
+	for i := range users {
+		if users[i].Id == id {
+			u.Id = id
+			users[i] = u
+			updated = true
 		}
 	}
-	if !updated { // Caso não tenha havido esse update, ou seja, se continuar como 'false'...
-		return User{}, fmt.Errorf("usuario %d não encontrado", id) // ... nos será enviada uma mensagem de erro
+	if !updated {
+		return User{}, fmt.Errorf("usuario %d não encontrado", id)
 	}
-	return u, nil // Retorno do novo produto com um erro do tipo 'nil'
+	return u, nil
+}
+
+func (repository) UpdateNome(id int, nome string) (User, error) {
+	var u User
+	updated := false
+	for i := range users {
+		if users[i].Id == id {
+			users[i].Nome = nome
+			updated = true
+			u = users[i]
+		}
+	}
+	if !updated {
+		return User{}, fmt.Errorf("produto %d não encontrado", id)
+	}
+	return u, nil
+}
+
+func (repository) Delete(id int) error {
+	deleted := false
+	var index int
+	for i := range users {
+		if users[i].Id == id {
+			index = i
+			deleted = true
+		}
+	}
+	if !deleted {
+		return fmt.Errorf("produto %d não encontrado", id)
+	}
+	users = append(users[:index], users[index+1:]...)
+	return nil
 }
